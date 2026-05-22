@@ -100,6 +100,15 @@
 
       <!-- Tab 3: Sales Report -->
       <div class="tab-panel" id="panelReport">
+        <!-- Period Filter Tabs -->
+        <div class="report-period-bar" id="reportPeriodBar">
+          <button class="period-tab active" data-period="daily">📅 Hari Ini</button>
+          <button class="period-tab" data-period="weekly">📆 Minggu Ini</button>
+          <button class="period-tab" data-period="monthly">🗓️ Bulan Ini</button>
+          <button class="period-tab" data-period="all">📊 Semua</button>
+        </div>
+        <div class="report-period-label" id="reportPeriodLabel"></div>
+
         <div class="report-stats">
           <div class="stat-card">
             <div class="stat-label">Total Pendapatan</div>
@@ -108,6 +117,10 @@
           <div class="stat-card">
             <div class="stat-label">Pesanan Selesai</div>
             <div class="stat-value success-val" id="reportCount">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Rata-rata per Pesanan</div>
+            <div class="stat-value" id="reportAvg" style="font-size:1.4rem;">Rp 0</div>
           </div>
         </div>
         <div class="data-table-wrap">

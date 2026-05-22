@@ -614,6 +614,7 @@ const AdminApp = (() => {
 
   let deleteTargetId = null;
   let previousOrderCount = 0;
+  let activePeriod = 'daily'; // 'daily' | 'weekly' | 'monthly' | 'all'
 
   // --- DOM references ---
   let els = {};
@@ -653,9 +654,12 @@ const AdminApp = (() => {
       deleteCancelBtn: document.getElementById('deleteCancelBtn'),
       deleteConfirmBtn: document.getElementById('deleteConfirmBtn'),
       // Report
-      reportRevenue:  document.getElementById('reportRevenue'),
-      reportCount:    document.getElementById('reportCount'),
-      reportTableBody: document.getElementById('reportTableBody'),
+      reportRevenue:    document.getElementById('reportRevenue'),
+      reportCount:      document.getElementById('reportCount'),
+      reportAvg:        document.getElementById('reportAvg'),
+      reportTableBody:  document.getElementById('reportTableBody'),
+      reportPeriodBar:  document.getElementById('reportPeriodBar'),
+      reportPeriodLabel: document.getElementById('reportPeriodLabel'),
     };
   };
 
@@ -938,20 +942,87 @@ const AdminApp = (() => {
     renderMenuTable();
   };
 
+  // --- Report Period Helpers ---
+
+  /** Get the start-of-day (00:00:00) for a given Date */
+  const startOfDay = (d) => {
+    const s = new Date(d);
+    s.setHours(0, 0, 0, 0);
+    return s;
+  };
+
+  /** Get the start of the ISO week (Monday) for a given Date */
+  const startOfWeek = (d) => {
+    const s = new Date(d);
+    const day = s.getDay(); // 0=Sun, 1=Mon, ...
+    const diff = day === 0 ? 6 : day - 1; // adjust so Mon=0
+    s.setDate(s.getDate() - diff);
+    s.setHours(0, 0, 0, 0);
+    return s;
+  };
+
+  /** Get the start of the month for a given Date */
+  const startOfMonth = (d) => {
+    const s = new Date(d);
+    s.setDate(1);
+    s.setHours(0, 0, 0, 0);
+    return s;
+  };
+
+  /** Format a Date range into a human-readable label */
+  const periodLabel = (period) => {
+    const now = new Date();
+    const fmt = (d) => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    switch (period) {
+      case 'daily':
+        return `📅 Hari ini — ${fmt(now)}`;
+      case 'weekly': {
+        const ws = startOfWeek(now);
+        const we = new Date(ws);
+        we.setDate(we.getDate() + 6);
+        return `📆 ${fmt(ws)} — ${fmt(we)}`;
+      }
+      case 'monthly':
+        return `🗓️ ${now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`;
+      case 'all':
+        return '📊 Semua waktu';
+      default:
+        return '';
+    }
+  };
+
+  /** Filter completed orders by the active period */
+  const filterByPeriod = (completed, period) => {
+    if (period === 'all') return completed;
+    const now = new Date();
+    let cutoff;
+    switch (period) {
+      case 'daily':   cutoff = startOfDay(now).getTime();   break;
+      case 'weekly':  cutoff = startOfWeek(now).getTime();  break;
+      case 'monthly': cutoff = startOfMonth(now).getTime(); break;
+      default:        return completed;
+    }
+    return completed.filter(o => (o.waktuMs || 0) >= cutoff);
+  };
+
   // --- Report ---
   const renderReport = () => {
     const orders = dbGet(DB_ORDERS);
-    const completed = orders.filter(o => o.status === 'completed');
+    const allCompleted = orders.filter(o => o.status === 'completed');
+    const completed = filterByPeriod(allCompleted, activePeriod);
 
     const totalRevenue = completed.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    const avgPerOrder = completed.length > 0 ? Math.round(totalRevenue / completed.length) : 0;
 
     if (els.reportRevenue) els.reportRevenue.textContent = formatIDR(totalRevenue);
     if (els.reportCount)   els.reportCount.textContent   = completed.length;
+    if (els.reportAvg)     els.reportAvg.textContent     = formatIDR(avgPerOrder);
+    if (els.reportPeriodLabel) els.reportPeriodLabel.textContent = periodLabel(activePeriod);
 
     if (!els.reportTableBody) return;
 
     if (!completed.length) {
-      els.reportTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:40px;">Belum ada pesanan selesai</td></tr>`;
+      els.reportTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:40px;">Belum ada pesanan selesai pada periode ini</td></tr>`;
       return;
     }
 
@@ -967,6 +1038,18 @@ const AdminApp = (() => {
         <td style="font-weight:700; color:var(--accent);">${formatIDR(o.total)}</td>
       </tr>
     `).join('');
+  };
+
+  // --- Period Tab Click Handler ---
+  const setupPeriodTabs = () => {
+    els.reportPeriodBar?.addEventListener('click', (e) => {
+      const tab = e.target.closest('.period-tab');
+      if (!tab) return;
+      els.reportPeriodBar.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activePeriod = tab.dataset.period;
+      renderReport();
+    });
   };
 
   // --- Refresh all views ---
@@ -1047,6 +1130,9 @@ const AdminApp = (() => {
     els.deleteModalClose?.addEventListener('click', closeDeleteModal);
     els.deleteCancelBtn?.addEventListener('click', closeDeleteModal);
     els.deleteConfirmBtn?.addEventListener('click', confirmDelete);
+
+    // Report period tabs
+    setupPeriodTabs();
 
     // Cross-tab sync
     setupStorageSync();

@@ -1299,6 +1299,43 @@ input, select, textarea { font-family: var(--font-body); outline: none; }
 }
 .stat-card .stat-value.success-val { color: var(--success); }
 
+/* ---------- Report Period Filter ---------- */
+.report-period-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.period-tab {
+  padding: 9px 20px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-normal);
+}
+.period-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.period-tab.active {
+  background: var(--accent);
+  color: var(--bg-base);
+  border-color: var(--accent);
+}
+
+.report-period-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  padding-left: 2px;
+}
+
 /* ============================================================
    RESPONSIVE — Mobile (< 680px)
    ============================================================ */
