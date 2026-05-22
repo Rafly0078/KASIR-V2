@@ -899,8 +899,8 @@ input, select, textarea { font-family: var(--font-body); outline: none; }
   background: rgba(0,0,0,0.6);
   z-index: 100;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition-normal);
-  pointer-events: auto;
 }
 .mobile-cart-overlay.active {
   opacity: 1;
@@ -918,12 +918,14 @@ input, select, textarea { font-family: var(--font-body); outline: none; }
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   z-index: 110;
   transform: translateY(100%);
+  pointer-events: none;
   transition: transform var(--transition-slow);
   flex-direction: column;
   overflow: hidden;
 }
 .mobile-cart-slide.active {
   transform: translateY(0);
+  pointer-events: auto;
 }
 .mobile-cart-slide .slide-handle {
   width: 40px; height: 4px;
