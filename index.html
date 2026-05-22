@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Kasir UMKM — Sistem Point of Sale modern untuk UMKM Indonesia. Kelola pesanan, terima pembayaran tunai & QRIS." />
+  <title>Kasir UMKM — Point of Sale</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ====== POS LAYOUT ====== -->
+  <div class="pos-layout">
+
+    <!-- ====== HEADER ====== -->
+    <header class="pos-header">
+      <div class="pos-brand">
+        <div class="pos-brand-icon">☕</div>
+        <div>
+          <h1>Kasir UMKM</h1>
+          <span>Point of Sale System</span>
+        </div>
+      </div>
+      <div class="pos-clock">
+        <div>
+          <div class="clock-date" id="clockDate"></div>
+        </div>
+        <div class="clock-time" id="clockTime"></div>
+      </div>
+    </header>
+
+    <!-- ====== PRODUCT CATALOG ====== -->
+    <main class="catalog-panel">
+      <div class="catalog-toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari menu..." />
+        </div>
+        <div class="category-tabs" id="categoryTabs">
+          <button class="cat-tab active" data-cat="semua">Semua</button>
+          <button class="cat-tab" data-cat="coffee">Coffee</button>
+          <button class="cat-tab" data-cat="manis">Manis</button>
+          <button class="cat-tab" data-cat="ringan">Ringan</button>
+          <button class="cat-tab" data-cat="berat">Berat</button>
+        </div>
+      </div>
+      <div class="product-grid" id="productGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+
+    <!-- ====== DESKTOP CART PANEL ====== -->
+    <aside class="cart-panel" id="desktopCartPanel">
+      <div class="cart-header">
+        <h2>🛒 Keranjang <span class="cart-count-badge" id="cartCountBadge">0</span></h2>
+        <button class="btn btn-ghost btn-sm" id="btnClearCart" title="Kosongkan Keranjang">🗑️ Hapus</button>
+      </div>
+      <div class="cart-items" id="cartItemsDesktop">
+        <div class="cart-empty" id="cartEmptyDesktop">
+          <div class="empty-icon">🛒</div>
+          <p>Keranjang masih kosong</p>
+          <p style="font-size:0.75rem; margin-top:4px;">Klik menu untuk menambahkan</p>
+        </div>
+      </div>
+      <div class="cart-summary" id="cartSummaryDesktop">
+        <div class="cart-stats">
+          <span><span id="totalItems">0</span> item</span>
+          <span><span id="totalTypes">0</span> jenis</span>
+        </div>
+        <div class="cart-total-row">
+          <span class="cart-total-label">Total</span>
+          <span class="cart-total-value" id="cartTotalDesktop">Rp 0</span>
+        </div>
+        <div class="table-input-row">
+          <input type="number" class="form-input" id="tableNumberDesktop" placeholder="Nomor Meja" min="1" />
+        </div>
+        <div class="checkout-btns">
+          <button class="btn btn-cash" id="btnCash">💵 Tunai</button>
+          <button class="btn btn-qris" id="btnQris">📱 QRIS</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ====== MOBILE CART TOGGLE (Bottom Bar) ====== -->
+  <div class="mobile-cart-toggle" id="mobileCartToggle">
+    <div class="toggle-left">
+      <div class="cart-icon-badge">
+        🛒
+        <span class="count" id="mobileCartCount">0</span>
+      </div>
+      <span style="font-weight:600; font-size:0.9rem;">Lihat Keranjang</span>
+    </div>
+    <span class="toggle-total" id="mobileCartTotal">Rp 0</span>
+  </div>
+
+  <!-- ====== MOBILE CART OVERLAY ====== -->
+  <div class="mobile-cart-overlay" id="mobileCartOverlay"></div>
+  <div class="mobile-cart-slide" id="mobileCartSlide">
+    <div class="slide-handle"></div>
+    <div class="cart-header">
+      <h2>🛒 Keranjang <span class="cart-count-badge" id="mobileCartBadge">0</span></h2>
+      <button class="btn btn-ghost btn-sm" id="btnClearCartMobile" title="Kosongkan">🗑️ Hapus</button>
+    </div>
+    <div class="cart-items" id="cartItemsMobile" style="flex:1; overflow-y:auto; padding:12px 16px;">
+      <!-- rendered dynamically -->
+    </div>
+    <div class="cart-summary">
+      <div class="cart-stats">
+        <span><span id="totalItemsMobile">0</span> item</span>
+        <span><span id="totalTypesMobile">0</span> jenis</span>
+      </div>
+      <div class="cart-total-row">
+        <span class="cart-total-label">Total</span>
+        <span class="cart-total-value" id="cartTotalMobile">Rp 0</span>
+      </div>
+      <div class="table-input-row">
+        <input type="number" class="form-input" id="tableNumberMobile" placeholder="Nomor Meja" min="1" />
+      </div>
+      <div class="checkout-btns">
+        <button class="btn btn-cash" id="btnCashMobile">💵 Tunai</button>
+        <button class="btn btn-qris" id="btnQrisMobile">📱 QRIS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== QRIS MODAL ====== -->
+  <div class="modal-overlay" id="qrisModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Pembayaran QRIS</h2>
+        <button class="modal-close" id="qrisModalClose">✕</button>
+      </div>
+      <div class="qris-modal-body">
+        <div class="qris-label">Total yang harus dibayar</div>
+        <div class="qris-amount" id="qrisAmount">Rp 0</div>
+        <div class="qris-img-wrap">
+          <img id="qrisImage" src="" alt="QR Code Pembayaran QRIS" />
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">Scan kode QR di atas menggunakan aplikasi e-wallet atau mobile banking Anda.</p>
+        <button class="btn btn-accent btn-lg" id="btnConfirmQris" style="width:100%;">✅ Konfirmasi Pembayaran Diterima</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SUCCESS MODAL ====== -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-content">
+      <div class="success-modal-body">
+        <div class="success-checkmark">✓</div>
+        <h3>Pesanan Berhasil!</h3>
+        <p class="success-detail" id="successOrderId"></p>
+        <p class="success-detail" id="successTable"></p>
+        <p class="success-detail" id="successMethod"></p>
+        <p class="success-detail" id="successTotal" style="font-size:1.1rem; font-weight:700; color:var(--accent); margin-top:8px;"></p>
+        <button class="btn btn-accent btn-lg" id="btnCloseSuccess" style="width:100%; margin-top:24px;">👍 Oke, Lanjut!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TOAST CONTAINER ====== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

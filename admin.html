@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Kasir UMKM — Dashboard Admin, Layar Dapur, Kelola Menu, dan Laporan Penjualan." />
+  <title>Admin — Kasir UMKM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ====== LOGIN SCREEN ====== -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="brand-area">
+        <div class="brand-icon">☕</div>
+        <h1>Kasir UMKM</h1>
+        <p>Masuk ke Dashboard Admin</p>
+      </div>
+      <div class="login-error" id="loginError">Username atau password salah!</div>
+      <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="loginUser">Username</label>
+          <input class="form-input" type="text" id="loginUser" placeholder="Masukkan username" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPass">Password</label>
+          <input class="form-input" type="password" id="loginPass" placeholder="Masukkan password" required />
+        </div>
+        <button class="btn btn-accent btn-lg" type="submit" style="width:100%; margin-top:8px;">🔑 Masuk</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== ADMIN DASHBOARD (hidden until login) ====== -->
+  <div class="admin-layout" id="adminDashboard" style="display:none;">
+
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-brand">
+        <div class="brand-icon">☕</div>
+        <div>
+          <h1>Kasir UMKM <small>Admin Dashboard</small></h1>
+        </div>
+      </div>
+      <div class="admin-header-actions">
+        <div class="order-count-live">
+          <span class="pulse-dot"></span>
+          <span><span id="liveOrderCount">0</span> pesanan aktif</span>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btnLogout">🚪 Logout</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="admin-tabs" id="adminTabs">
+      <button class="admin-tab active" data-tab="kitchen">🍳 Layar Dapur <span class="tab-badge" id="kitchenBadge" style="display:none;">0</span></button>
+      <button class="admin-tab" data-tab="menu">📋 Kelola Menu</button>
+      <button class="admin-tab" data-tab="report">📊 Laporan Penjualan</button>
+    </nav>
+
+    <!-- Tab Content -->
+    <div class="admin-content">
+
+      <!-- Tab 1: Kitchen Display -->
+      <div class="tab-panel active" id="panelKitchen">
+        <div class="kitchen-grid" id="kitchenGrid">
+          <!-- Rendered dynamically -->
+        </div>
+        <div class="kitchen-empty" id="kitchenEmpty" style="display:none;">
+          <div class="empty-icon">🍳</div>
+          <h3>Belum ada pesanan aktif</h3>
+          <p>Pesanan baru akan muncul di sini secara otomatis.</p>
+        </div>
+      </div>
+
+      <!-- Tab 2: Menu CRUD -->
+      <div class="tab-panel" id="panelMenu">
+        <div class="menu-toolbar">
+          <h2 style="font-family:var(--font-heading); font-size:1.2rem; font-weight:700;">Daftar Menu</h2>
+          <button class="btn btn-accent" id="btnAddMenu">➕ Tambah Menu</button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="menuTable">
+            <thead>
+              <tr>
+                <th>Gambar</th>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="menuTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: Sales Report -->
+      <div class="tab-panel" id="panelReport">
+        <div class="report-stats">
+          <div class="stat-card">
+            <div class="stat-label">Total Pendapatan</div>
+            <div class="stat-value" id="reportRevenue">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pesanan Selesai</div>
+            <div class="stat-value success-val" id="reportCount">0</div>
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>ID Pesanan</th>
+                <th>Meja</th>
+                <th>Metode</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MENU MODAL (Add / Edit) ====== -->
+  <div class="modal-overlay" id="menuModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="menuModalTitle">Tambah Menu</h2>
+        <button class="modal-close" id="menuModalClose">✕</button>
+      </div>
+      <form id="menuForm" autocomplete="off">
+        <input type="hidden" id="menuEditId" />
+        <div class="form-group">
+          <label class="form-label" for="menuName">Nama Menu</label>
+          <input class="form-input" type="text" id="menuName" placeholder="Contoh: Americano" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="menuPrice">Harga (Rp)</label>
+          <input class="form-input" type="number" id="menuPrice" placeholder="Contoh: 25000" min="0" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="menuCategory">Kategori</label>
+          <select class="form-select" id="menuCategory" required>
+            <option value="">— Pilih Kategori —</option>
+            <option value="coffee">Coffee</option>
+            <option value="manis">Manis</option>
+            <option value="ringan">Ringan</option>
+            <option value="berat">Berat</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="menuImg">URL Gambar</label>
+          <input class="form-input" type="url" id="menuImg" placeholder="https://..." />
+          <small style="color:var(--text-muted); font-size:0.72rem;">Kosongkan untuk gambar default</small>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" type="button" id="menuFormCancel">Batal</button>
+          <button class="btn btn-accent" type="submit">💾 Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== DELETE CONFIRM MODAL ====== -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Hapus Menu</h2>
+        <button class="modal-close" id="deleteModalClose">✕</button>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.9rem;">Apakah Anda yakin ingin menghapus <strong id="deleteMenuName"></strong>? Tindakan ini tidak bisa dibatalkan.</p>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="deleteCancelBtn">Batal</button>
+        <button class="btn btn-danger" id="deleteConfirmBtn">🗑️ Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TOAST CONTAINER ====== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
